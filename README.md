@@ -8,5 +8,7 @@ Git push → Jenkins job triggered
 
 `Password: 81ba8a4c9e29475498560b64f5afbe0a`
 `Jenkins@123`
-`i1s_akash@dev`
+`i1s_akashatdev`
 `http://localhost:8080/`
+
+`node -v`
