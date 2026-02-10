@@ -12,3 +12,4 @@ Git push → Jenkins job triggered
 `http://localhost:8080/`
 
 `node -v`
+`npm -v`
