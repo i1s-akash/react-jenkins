@@ -35,7 +35,8 @@ Deploy build/ to Server
 4. GitHub Webhook Setup
 5. Verification
 6. Final Result
-7. Next Steps
+7. ngrok?
+8. Next Steps
 
 ---
 
@@ -309,7 +310,7 @@ Jenkins should auto-trigger and build successfully.
 
 ---
 
-# 🏁 Final Result
+# 🏁 6. Final Result
 
 You now have:
 
@@ -318,6 +319,67 @@ You now have:
 ✔ Declarative CI pipeline  
 ✔ GitHub webhook automation  
 ✔ React production build
+
+---
+
+# 7. What is ngrok?
+
+ngrok is a tunneling tool that exposes your local development server to the internet using a secure public URL.
+
+It allows external services (like payment gateways, OAuth providers, or webhooks) to access your locally running application.
+
+---
+
+## Why Use ngrok?
+
+- Test webhooks (Stripe, Razorpay, GitHub, etc.)
+- Test OAuth callback URLs (Google login, AWS Cognito, etc.)
+- Share local development builds with teammates or clients
+- Test mobile apps connected to a local backend
+
+---
+
+## How It Works
+
+If your application runs locally at:
+
+http://localhost:3000
+
+Run the following command:
+
+```bash
+ngrok http 3000
+```
+
+ngrok will generate a public URL like:
+
+https://abc123.ngrok.io
+
+All traffic to this public URL will be securely forwarded to your local server.
+
+---
+
+## Installation
+
+1. Download ngrok from: https://ngrok.com
+2. Install and authenticate:
+
+```bash
+ngrok config add-authtoken <your-auth-token>
+```
+
+3. Start tunnel:
+
+```bash
+ngrok http <port>
+```
+
+---
+
+## Notes
+
+- Free plan URLs change every time you restart ngrok.
+- Paid plans allow custom domains and reserved URLs.
 
 ---
 
