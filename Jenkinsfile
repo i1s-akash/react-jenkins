@@ -11,7 +11,6 @@ pipeline {
 
     stages {
 
-
         stage('Verify Node') {
             steps {
                 sh 'node -v'
