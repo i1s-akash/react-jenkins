@@ -1,11 +1,19 @@
 Jenkins Credentials:
 
 ```
-Username: i1s_akashatdev
-Password: 81ba8a4c9e29475498560b64f5afbe0a/Jenkins@123
+Username: i1s_akashatdev/i1s_akashatjenkins
+Password: 81ba8a4c9e29475498560b64f5afbe0a/Jenkins@123/0b7a847bfec24f28b00f38df564a44fe
 ```
 
-Jenkins URL: `http://localhost:8080/`
+Jenkins URL: `http://localhost:8080/` / `http://52.90.60.192:8080/`
+
+AWS Credentials:
+
+```
+My Mail
+Root User
+Password: Aws@09****
+```
 
 # 🚀 React CI Pipeline using Jenkins
 
@@ -91,6 +99,12 @@ Start Jenkins:
 
 ```bash
 brew services start jenkins-lts
+```
+
+Stop Jenkins:
+
+```bash
+brew services stop jenkins-lts
 ```
 
 Verify:
@@ -390,3 +404,6 @@ ngrok http <port>
 - Add Deployment stage (Nginx / S3)
 - Add Docker-based pipeline
 - Secure Jenkins with HTTPS
+
+<!-- Root User vs IAM User -->
+<!-- jetty web server -->
