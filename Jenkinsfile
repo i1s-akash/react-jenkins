@@ -35,6 +35,16 @@ pipeline {
                 sh 'npm run build'
             }
         }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                sudo rm -rf /var/www/frontend/*
+                sudo cp -r dist/* /var/www/frontend/
+                sudo chown -R www-data:www-data /var/www/frontend
+                '''
+            }
+        }
     }
 
     post {
