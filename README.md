@@ -774,12 +774,4 @@ ngrok http <port>
 
 # 🔜 Next Steps
 
-- Deploy Jenkins on AWS EC2 (24/7 availability)
-- Add Role-Based Access Control (RBAC)
-- Add Deployment stage (Nginx / S3)
-- Add Docker-based pipeline
-- Secure Jenkins with HTTPS
-
-<!-- Root User vs IAM User -->
-<!-- Nginx -->
-<!-- Linus Fundamentals -->
+Add Role-Based Access Control (RBAC)
