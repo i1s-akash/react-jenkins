@@ -5,7 +5,7 @@ Username: i1s_akashatdev/i1s_akashatjenkins
 Password: 81ba8a4c9e29475498560b64f5afbe0a/Jenkins@123/0b7a847bfec24f28b00f38df564a44fe
 ```
 
-Jenkins URL: `http://localhost:8080/` / `http://52.90.60.192:8080/`
+Jenkins URL: `http://localhost:8080/` / `http://23.20.83.223:8080/` / `http://i1sakash.jumpingcrab.com/` / `http://i1sakashatfrontend.jumpingcrab.com/`
 
 AWS Credentials:
 
@@ -407,3 +407,5 @@ ngrok http <port>
 
 <!-- Root User vs IAM User -->
 <!-- jetty web server -->
+<!-- Need a web server to deploy the build/folder -->
+<!--  -->
