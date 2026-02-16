@@ -1,56 +1,150 @@
-Jenkins Credentials:
+# 🚀 React CI/CD Deployment using Jenkins + Nginx + AWS EC2
 
-```
-Username: i1s_akashatdev/i1s_akashatjenkins
-Password: 81ba8a4c9e29475498560b64f5afbe0a/Jenkins@123/0b7a847bfec24f28b00f38df564a44fe
-```
+This project demonstrates a complete CI/CD pipeline for building and deploying a React (Vite) application to production using:
 
-Jenkins URL: `http://localhost:8080/` / `http://23.20.83.223:8080/` / `http://i1sakash.jumpingcrab.com/` / `http://i1sakashatfrontend.jumpingcrab.com/`
+AWS EC2 (Ubuntu 22.04)
+Jenkins (CI/CD Server)
+Node.js 20 LTS
+Nginx (Reverse Proxy + Static Hosting)
+GitHub Webhooks
+Ngrok(For local jenkins deployment)
 
-<!-- Check webhook -->
+---
 
-AWS Credentials:
+# 🌐 Live URLs
+
+- 🔧 Jenkins: http://i1sakash.jumpingcrab.com/
+- 🌍 Frontend: http://i1sakashatfrontend.jumpingcrab.com/
 
 ```
 My Mail
 Root User
-Password: Aws@09****
+Password: **********
 ```
 
-# 🚀 React CI Pipeline using Jenkins
+---
 
-# 🔁 CI Flow
+# 🏗 Architecture Flow
 
 ```
-Git Push
-   ↓
-Jenkins Job Triggered (Webhook)
-   ↓
-Install Dependencies
-   ↓
-Lint + Test (Optional)
-   ↓
-Build React App
-   ↓
-Deploy build/ to Server
+GitHub Push
+      ↓
+Jenkins (EC2)
+      ↓
+npm ci
+      ↓
+npm run build
+      ↓
+dist/
+      ↓
+/var/www/frontend
+      ↓
+Nginx
+      ↓
+Public Domain
 ```
 
 ---
 
 # 📚 Table of Contents
 
-1. Jenkins Setup (macOS)
-2. NodeJS Plugin Configuration
-3. Pipeline Setup
-4. GitHub Webhook Setup
-5. Verification
-6. Final Result
-7. ngrok?
-8. Next Steps
+1. AWS Setup
+2. EC2 Setup
+3. Networking & Architecture
+4. Jenkins Installation (EC2)
+5. Jenkins Setup (macOS - Local Dev)
+6. NodeJS Plugin Configuration
+7. Nginx Setup
+8. Pipeline Setup
+9. Permissions Setup
+10. Build & Deployment Strategy
+11. GitHub Webhook Setup
+12. Performance Optimization
+13. Verification
+14. Final Result
+15. ngrok (Local Webhook Testing)
+16. Next Steps
 
 ---
 
-# ⚙️ 1️⃣ Jenkins Setup (macOS)
+# 1️⃣ AWS Setup
+
+- Create AWS account
+- Use IAM user (do NOT use root for daily work)
+- Select region
+- Generate SSH key pair
+
+---
+
+# 2️⃣ EC2 Setup
+
+- Launch Ubuntu 22.04
+- Instance type: t2.micro
+- Enable auto-assign public IP
+- Configure Security Group:
+
+| Port | Purpose                 |
+| ---- | ----------------------- |
+| 22   | SSH                     |
+| 80   | HTTP                    |
+| 443  | HTTPS                   |
+| 8080 | Jenkins (Internal only) |
+
+Connect via SSH:
+
+```bash
+ssh -i your-key.pem ubuntu@<public-ip>
+```
+
+---
+
+# 3️⃣ Networking & Architecture
+
+## Ports Used
+
+- 22 → SSH
+- 80 → HTTP
+- 443 → HTTPS (future)
+- 8080 → Jenkins
+
+# 4️⃣ Jenkins Installation (EC2)
+
+Install Java:
+
+```bash
+sudo apt update
+sudo apt install openjdk-17-jdk -y
+```
+
+Install Jenkins:
+
+```bash
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee \
+  /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+sudo apt update
+sudo apt install jenkins -y
+```
+
+Start Jenkins:
+
+```bash
+sudo systemctl start jenkins
+```
+
+Get admin password:
+
+```bash
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+```
+
+---
+
+# 5️⃣ Jenkins Setup (macOS - Optional Local Setup)
 
 ## Install Homebrew
 
@@ -133,6 +227,8 @@ http://localhost:8080
 
 ---
 
+# 6️⃣ NodeJS Plugin Configuration
+
 ## Get Initial Admin Password
 
 ```bash
@@ -161,9 +257,7 @@ This installs:
 
 Create an admin user and complete setup.
 
----
-
-# 🟢 2️⃣ NodeJS Plugin Configuration
+NodeJS Plugin Configuration
 
 ## Install NodeJS Plugin
 
@@ -203,7 +297,68 @@ Save.
 
 ---
 
-# 🏗 3️⃣ Pipeline Setup
+# 7️⃣ Nginx Setup
+
+Install:
+
+```bash
+sudo apt install nginx -y
+```
+
+## Jenkins Reverse Proxy
+
+File:
+
+```
+/etc/nginx/sites-available/jenkins
+```
+
+```nginx
+server {
+    listen 80;
+    server_name i1sakash.jumpingcrab.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+    }
+}
+```
+
+---
+
+## Frontend Static Hosting
+
+File:
+
+```
+/etc/nginx/sites-available/frontend
+```
+
+```nginx
+server {
+    listen 80;
+    server_name i1sakashatfrontend.jumpingcrab.com;
+
+    root /var/www/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+}
+```
+
+Enable sites:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/frontend /etc/nginx/sites-enabled/
+sudo systemctl restart nginx
+```
+
+---
+
+# 8️⃣ Pipeline Setup (Jenkinsfile)
 
 Create a new **Pipeline Job** in Jenkins.
 
@@ -223,17 +378,9 @@ pipeline {
 
     stages {
 
-        stage('Verify Node') {
-            steps {
-                sh 'node -v'
-                sh 'npm -v'
-            }
-        }
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/i1s-akash/react-jenkins.git'
+                checkout scm
             }
         }
 
@@ -248,18 +395,39 @@ pipeline {
                 sh 'npm run build'
             }
         }
-    }
 
-    post {
-        success {
-            echo '✅ React build successful'
-        }
-        failure {
-            echo '❌ React build failed'
+        stage('Deploy') {
+            steps {
+                sh '''
+                    rm -rf /var/www/frontend/*
+                    cp -r dist/. /var/www/frontend/
+                '''
+            }
         }
     }
 }
 ```
+
+---
+
+# 9️⃣ Permissions Setup
+
+Allow Jenkins to deploy:
+
+```bash
+sudo chown -R jenkins:jenkins /var/www/frontend
+sudo chmod -R 755 /var/www/frontend
+```
+
+---
+
+# 🔟 Build & Deployment Strategy
+
+- Use `npm ci` for clean installs
+- Build inside Jenkins
+- Deploy static files to Nginx
+- No sudo inside Jenkinsfile
+- Reverse proxy isolates Jenkins from public exposure
 
 ---
 
@@ -292,6 +460,7 @@ Set:
 ```
 Payload URL:
 https://your-ngrok-url.ngrok-free.dev/github-webhook/
+http://i1sakash.jumpingcrab.com/github-webhook/
 
 Content type:
 application/json
@@ -306,35 +475,39 @@ Now every `git push` automatically triggers Jenkins.
 
 ---
 
-# 🧪 5️⃣ Verification
+# 1️⃣2️⃣ Performance Optimization
 
-Check Node & npm:
+Enable gzip in `/etc/nginx/nginx.conf`:
 
-```bash
-node -v
-npm -v
+```nginx
+gzip on;
+gzip_types text/plain text/css application/javascript;
 ```
+
+Enable static caching:
+
+```nginx
+location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+    expires 7d;
+}
+```
+
+---
+
+# 1️⃣3️⃣ Verification
 
 Push a commit:
 
 ```bash
-git commit -am "test webhook"
+git commit -am "Test"
 git push
 ```
 
-Jenkins should auto-trigger and build successfully.
+Pipeline should:
 
----
-
-# 🏁 6. Final Result
-
-You now have:
-
-✔ Jenkins running on macOS  
-✔ NodeJS 20 integrated  
-✔ Declarative CI pipeline  
-✔ GitHub webhook automation  
-✔ React production build
+- Install dependencies
+- Build React app
+- Deploy automatically
 
 ---
 
@@ -410,4 +583,9 @@ ngrok http <port>
 <!-- Root User vs IAM User -->
 <!-- jetty web server -->
 <!-- Need a web server to deploy the build/folder -->
-<!--  -->
+<!-- What is web server ? -->
+<!-- EC2 Setup, Billing Budget vs Cloudwatch -->
+<!-- Jenkins -->
+<!-- Nginx -->
+<!-- GitHub Webhook -->
+<!-- Linus Fundamentals -->
