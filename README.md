@@ -1,13 +1,13 @@
-# 🚀 React CI/CD Deployment using Jenkins + Nginx + AWS EC2
+# 🚀 React CI/CD Deployment using [Jenkins + Nginx + AWS EC2 + GitHub]/[Jenkins + Nginx + AWS EC2 + GitHub + Ngrok]
 
 This project demonstrates a complete CI/CD pipeline for building and deploying a React (Vite) application to production using:
 
-AWS EC2 (Ubuntu 22.04)
-Jenkins (CI/CD Server)
-Node.js 20 LTS
-Nginx (Reverse Proxy + Static Hosting)
-GitHub Webhooks
-Ngrok(For local jenkins deployment)
+- AWS EC2 (Ubuntu 22.04)
+- Jenkins (CI/CD Server)
+- Node.js 20 LTS
+- Nginx (Reverse Proxy + Static Hosting)
+- GitHub Webhooks
+- Ngrok(For local jenkins deployment)
 
 ---
 
@@ -349,12 +349,212 @@ server {
 }
 ```
 
-Enable sites:
+## 📌 What is Nginx?
+
+Nginx (pronounced _Engine-X_) is:
+
+- A Web Server
+- A Reverse Proxy
+- A Load Balancer
+- A Static File Server
+
+It is widely used in production environments because it is fast, lightweight, and scalable.
+
+---
+
+## 🏗 Role of Nginx in This Project
+
+In this CI/CD setup, Nginx performs two major tasks:
+
+1. Reverse Proxy for Jenkins
+2. Static File Hosting for React App
+
+---
+
+## 🧠 Architecture Flow
+
+```
+User Browser
+     ↓
+Domain (jumpingcrab.com)
+     ↓
+Nginx (Port 80)
+     ↓
+1️⃣ Jenkins → 127.0.0.1:8080
+2️⃣ React App → /var/www/frontend
+```
+
+---
+
+## 🔁 Reverse Proxy Concept
+
+A reverse proxy sits between the client and backend server.
+
+Instead of exposing backend services directly (like port 8080), Nginx:
+
+- Receives public traffic
+- Forwards it internally
+- Hides internal ports
+- Adds security layer
+
+### Example: Jenkins Reverse Proxy
+
+```nginx
+server {
+    listen 80;
+    server_name i1sakash.jumpingcrab.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+    }
+}
+```
+
+Flow:
+
+Browser → Nginx → Jenkins (localhost:8080)
+
+---
+
+## 🌍 Static File Hosting (React App)
+
+After building the React app:
+
+```
+npm run build
+```
+
+Output is generated in:
+
+```
+dist/
+```
+
+Files are copied to:
+
+```
+/var/www/frontend
+```
+
+Nginx serves them directly:
+
+```nginx
+server {
+    listen 80;
+    server_name i1sakashatfrontend.jumpingcrab.com;
+
+    root /var/www/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+}
+```
+
+Flow:
+
+Browser → Nginx → Static HTML/CSS/JS files
+
+No Node server required.
+
+---
+
+## 🚀 Why Use Nginx?
+
+- Very fast (event-driven architecture)
+- Handles thousands of concurrent connections
+- Low memory usage
+- Industry standard for reverse proxy
+- Easy SSL integration
+- Supports multiple domains on one server
+
+---
+
+## 🔐 Security Benefits
+
+- Prevents exposing internal ports (like 8080)
+- Centralizes traffic handling
+- Can add rate limiting
+- Can enable HTTPS easily
+- Protects backend services
+
+---
+
+## ⚡ Performance Optimization
+
+### Enable Gzip
+
+In `/etc/nginx/nginx.conf`:
+
+```nginx
+gzip on;
+gzip_types text/plain text/css application/javascript;
+```
+
+### Enable Static Caching
+
+```nginx
+location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+    expires 7d;
+}
+```
+
+This improves frontend loading speed.
+
+---
+
+## 📂 Important Nginx Directories
+
+| Path                       | Purpose               |
+| -------------------------- | --------------------- |
+| /etc/nginx/nginx.conf      | Main config file      |
+| /etc/nginx/sites-available | Virtual host configs  |
+| /etc/nginx/sites-enabled   | Enabled sites         |
+| /var/www/                  | Static file directory |
+
+---
+
+## 🔄 Common Commands
+
+Test configuration:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/frontend /etc/nginx/sites-enabled/
+sudo nginx -t
+```
+
+Restart Nginx:
+
+```bash
 sudo systemctl restart nginx
 ```
+
+Check status:
+
+```bash
+sudo systemctl status nginx
+```
+
+---
+
+## 🧩 Key Concepts
+
+### Web Server
+
+Serves static files (HTML, CSS, JS)
+
+### Reverse Proxy
+
+Forwards client requests to internal servers
+
+### Load Balancer
+
+Distributes traffic across multiple servers
+
+### Server Block
+
+Defines configuration for a domain
 
 ---
 
@@ -431,7 +631,7 @@ sudo chmod -R 755 /var/www/frontend
 
 ---
 
-# 🔔 4️⃣ GitHub Webhook Setup (Local Development)
+# 🔔 1️⃣1️⃣ GitHub Webhook Setup (Local Development)
 
 ## Expose Jenkins (Temporary Local Access)
 
@@ -581,11 +781,5 @@ ngrok http <port>
 - Secure Jenkins with HTTPS
 
 <!-- Root User vs IAM User -->
-<!-- jetty web server -->
-<!-- Need a web server to deploy the build/folder -->
-<!-- What is web server ? -->
-<!-- EC2 Setup, Billing Budget vs Cloudwatch -->
-<!-- Jenkins -->
 <!-- Nginx -->
-<!-- GitHub Webhook -->
 <!-- Linus Fundamentals -->
